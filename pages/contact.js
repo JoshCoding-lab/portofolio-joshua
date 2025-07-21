@@ -8,7 +8,6 @@ export default function Contact() {
         <title>Kontak - Joshua Barani</title>
       </Head>
 
-      <Navbar />
 
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-100 px-4">
         <div className="bg-white p-8 rounded-xl shadow-lg max-w-xl">
