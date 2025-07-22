@@ -29,6 +29,7 @@ export default function Home() {
 
   return (
     <>
+
       <Head>
         <title>Joshua Barani - Web Developer Portfolio</title>
         <meta name="description" content="Professional portfolio of Joshua Barani - Web Developer specializing in modern web technologies" />
