@@ -94,8 +94,12 @@ export default function App() {
   ];
 
   return (
-    <div className="font-sans antialiased bg-gray-900 text-white min-h-screen flex flex-col">
-      {/* Animated Background */}
+    <div className="font-sans antialiased bg-gray-900 text-white min-h-screen flex flex-col ">
+       <motion.img
+      src="profile.jpg"
+      alt="Background Joshua"
+      className="absolute inset-0 w-full h-full object-cover opacity-15 blur-x1 "
+    />
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 opacity-95"></div>
         <div className="absolute inset-0 opacity-20 bg-[url('https://placehold.co/1920x1080/000000/FFFFFF/png?text=Background')] bg-cover bg-center mix-blend-overlay"></div>
@@ -215,14 +219,14 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <p className="text-gray-300 mb-6 leading-relaxed">
-                Saya adalah seorang Web Developer dengan pengalaman lebih dari 3 tahun dalam membangun aplikasi web modern. 
-                Spesialisasi saya meliputi pengembangan frontend menggunakan React/Next.js dan backend dengan Node.js serta CodeIgniter.
+                Saya adalah seorang Web Developer yang baru belajar dalam membangun aplikasi web modern. 
+                Spesialisasi saya meliputi pengembangan frontend menggunakan React/Next.js dan backend dengan Supabase dan codeigniter
               </p>
               <p className="text-gray-300 mb-6 leading-relaxed">
-                Saya memiliki minat kuat dalam keamanan digital dan selalu berusaha menerapkan praktik terbaik keamanan dalam setiap proyek yang saya kerjakan.
+                Saya memiliki minat kuat dalam projek berbau web dan selalu berusaha menerapkan praktik terbaik ke setiap proyek yang saya kerjakan.
               </p>
               <div className="flex flex-wrap gap-2">
-                {['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Node.js', 'Supabase', 'CodeIgniter', 'MySQL'].map((tech, index) => (
+                {['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Supabase', 'CodeIgniter', 'MySQL'].map((tech, index) => (
                   <motion.span
                     key={tech}
                     className="px-3 py-1 bg-gray-700 rounded-full text-sm text-gray-200"
