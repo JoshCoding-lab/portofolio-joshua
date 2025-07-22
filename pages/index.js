@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { createClient } from '@supabase/supabase-js';
+
+// Inisialisasi Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function App() {
   // State untuk form kontak
   const [form, setForm] = useState({ nama: '', email: '', pesan: '' });
   const [status, setStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Effect untuk smooth scrolling
   useEffect(() => {
@@ -18,18 +25,52 @@ export default function App() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Handler submit form kontak (tanpa Supabase untuk lingkungan mandiri)
+  // Validasi email
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  // Handler submit form kontak ke Supabase
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     setStatus('Mengirim pesan...');
-    // Simulasi pengiriman pesan
+    
+    // Validasi form
+    if (!form.nama || !form.email || !form.pesan) {
+      setStatus('❌ Harap isi semua field');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!validateEmail(form.email)) {
+      setStatus('❌ Email tidak valid');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
+      const { data, error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            name: form.nama,
+            email: form.email,
+            message: form.pesan,
+            created_at: new Date().toISOString()
+          }
+        ]);
+      
+      if (error) throw error;
+      
       setStatus('✅ Pesan berhasil dikirim!');
       setForm({ nama: '', email: '', pesan: '' });
+      
     } catch (error) {
-      console.error(error);
-      setStatus('❌ Gagal mengirim pesan. Silakan coba lagi.');
+      console.error('Error:', error);
+      setStatus(`❌ Gagal mengirim pesan: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -57,7 +98,6 @@ export default function App() {
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 opacity-95"></div>
-        {/* Menggunakan placeholder gambar untuk latar belakang */}
         <div className="absolute inset-0 opacity-20 bg-[url('https://placehold.co/1920x1080/000000/FFFFFF/png?text=Background')] bg-cover bg-center mix-blend-overlay"></div>
       </div>
 
@@ -104,8 +144,7 @@ export default function App() {
           className="p-8 rounded-xl bg-gray-800/60 backdrop-blur-sm shadow-2xl max-w-2xl text-center border border-gray-700 relative z-10"
         >
           <motion.img
-            // Menggunakan placeholder gambar untuk foto profil
-            src="https://placehold.co/150x150/4A5568/FFFFFF/png?text=Profile"
+            src="profile.jpg"
             alt="Foto Joshua Barani"
             className="w-32 h-32 md:w-48 md:h-48 rounded-full shadow-lg mb-6 mx-auto border-4 border-gray-700 object-cover hover:border-blue-400 transition-all duration-300"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -136,24 +175,22 @@ export default function App() {
             transition={{ delay: 0.9, duration: 0.5 }}
           >
             <a 
-              href="https://github.com/joshcodinglab" // Menggunakan placeholder URL
+              href="https://github.com/joshcodinglab"
               target="_blank" 
               className="px-4 py-2 rounded-full bg-gray-700 hover:bg-gray-600 text-white transition-all flex items-center gap-2"
               rel="noopener noreferrer"
             >
-              {/* GitHub SVG Icon */}
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
               </svg>
               GitHub
             </a>
             <a 
-              href="https://linkedin.com/in/suaganteng" // Menggunakan placeholder URL
+              href="https://linkedin.com/in/suaganteng"
               target="_blank" 
               className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-2"
               rel="noopener noreferrer"
             >
-              {/* LinkedIn SVG Icon */}
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
               </svg>
@@ -287,10 +324,10 @@ export default function App() {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">Nama</label>
+              <label htmlFor="nama" className="block text-sm font-medium text-gray-400 mb-1">Nama</label>
               <input 
                 type="text" 
-                id="name" 
+                id="nama"
                 name="nama"
                 value={form.nama}
                 onChange={handleChange}
@@ -313,9 +350,9 @@ export default function App() {
               />
             </div>
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-1">Pesan</label>
+              <label htmlFor="pesan" className="block text-sm font-medium text-gray-400 mb-1">Pesan</label>
               <textarea 
-                id="message" 
+                id="pesan" 
                 name="pesan"
                 value={form.pesan}
                 onChange={handleChange}
@@ -327,26 +364,32 @@ export default function App() {
             </div>
             <motion.button
               type="submit"
-              className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+              className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              disabled={isSubmitting}
             >
-              Kirim Pesan
+              {isSubmitting ? 'Mengirim...' : 'Kirim Pesan'}
             </motion.button>
-            {status && <p className={`text-sm mt-2 text-center ${status.startsWith('✅') ? 'text-green-400' : 'text-red-400'}`}>{status}</p>}
+            {status && (
+              <p className={`text-sm mt-2 text-center ${
+                status.startsWith('✅') ? 'text-green-400' : 
+                status.startsWith('❌') ? 'text-red-400' : 'text-gray-400'
+              }`}>
+                {status}
+              </p>
+            )}
           </form>
           <div className="mt-8 pt-8 border-t border-gray-700">
             <h3 className="text-lg font-medium text-gray-300 mb-4">Atau hubungi saya melalui:</h3>
             <div className="flex flex-col space-y-3">
-              <a href="mailto:joshua@example.com" className="flex items-center text-blue-400 hover:underline">
-                {/* Mail SVG Icon */}
+              <a href="mailto:Omogokk@gmail.com" className="flex items-center text-blue-400 hover:underline">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                joshua@example.com
+                Omogokk@gmail.com
               </a>
               <a href="tel:+628123456789" className="flex items-center text-blue-400 hover:underline">
-                {/* Phone SVG Icon */}
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
@@ -371,21 +414,12 @@ export default function App() {
                 name: 'linkedin', 
                 url: 'https://linkedin.com/in/suaganteng', 
                 svg: <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-              },
-              { 
-                name: 'twitter', 
-                url: 'https://twitter.com/username', 
-                svg: <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.414 0-6.184 2.771-6.184 6.184 0 .485.055.958.162 1.41C7.69 8.095 4.067 6.13 1.64 3.16c-.523.896-.823 1.933-.823 3.033 0 2.144 1.096 4.037 2.766 5.148-.256-.007-.49-.026-.736-.082v.077c0 2.992 2.13 5.474 4.93 6.04-.526.143-1.083.21-1.656.21-.402 0-.79-.039-1.168-.111.78 2.443 3.03 4.223 5.71 4.272-2.09 1.64-4.724 2.628-7.59 2.628-.492 0-.97-.029-1.437-.084C2.828 20.672 6.04 22 9.42 22c10.108 0 15.65-8.373 15.65-15.65 0-.238-.006-.47-.019-.707.677-.488 1.265-1.097 1.734-1.795z"/></svg>
-              },
-              { 
-                name: 'instagram', 
-                url: 'https://instagram.com/username', 
-                svg: <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.204-.012 3.584-.07 4.85-1.148 3.252-1.691 4.771-4.919 4.919-1.266.058-1.644.069-4.849.069-3.204 0-3.584-.012-4.85-.07-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.849 0-3.204.012-3.584.07-4.85 1.148-3.252 1.691-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.073 4.948.073 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM12 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.44-.645 1.44-1.44s-.645-1.44-1.44-1.44z"/></svg>
               }
-            ].map((social) => (
+            ].map((social, index) => (
               <a 
-                key={social.name}
+                key={index}
                 href={social.url}
+                aria-label={social.name}
                 className="text-gray-400 hover:text-blue-400 transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
