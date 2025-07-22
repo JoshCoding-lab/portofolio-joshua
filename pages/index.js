@@ -1,14 +1,45 @@
-import Head from 'next/head'
-import { useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import Head from 'next/head'; // Tetap menggunakan Head karena Anda menyebutkan direktori (mengindikasikan Next.js)
+import { createClient } from '@supabase/supabase-js'; // Tetap menggunakan Supabase jika Anda menggunakannya di Next.js
+
+// Konfigurasi Supabase - PASTIKAN .env.local Anda terisi dengan benar di proyek Next.js
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function Home() {
+  // State untuk form kontak
+  const [form, setForm] = useState({ nama: '', email: '', pesan: '' });
+  const [status, setStatus] = useState('');
+
+  // Effect untuk smooth scrolling
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      document.documentElement.style.scrollBehavior = 'smooth'
+      document.documentElement.style.scrollBehavior = 'smooth';
     }
-  }, [])
+  }, []);
 
+  // Handler perubahan input form
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // Handler submit form kontak
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.from('kontak').insert([form]);
+    if (error) {
+      console.error(error);
+      setStatus('❌ Gagal mengirim pesan.');
+    } else {
+      setStatus('✅ Pesan berhasil dikirim!');
+      setForm({ nama: '', email: '', pesan: '' });
+    }
+  };
+
+  // Data proyek
   const projects = [
     {
       title: "E-commerce Platform",
@@ -25,11 +56,10 @@ export default function Home() {
       description: "Custom CMS for creative portfolios",
       tech: ["CodeIgniter", "MySQL", "jQuery"]
     }
-  ]
+  ];
 
   return (
     <>
-
       <Head>
         <title>Joshua Barani - Web Developer Portfolio</title>
         <meta name="description" content="Professional portfolio of Joshua Barani - Web Developer specializing in modern web technologies" />
@@ -38,6 +68,7 @@ export default function Home() {
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 opacity-95"></div>
+        {/* Menggunakan jalur gambar lokal Anda */}
         <div className="absolute inset-0 opacity-20 bg-[url('/profile.jpg')] bg-cover bg-center mix-blend-overlay"></div>
       </div>
 
@@ -84,6 +115,7 @@ export default function Home() {
           className="p-8 rounded-xl bg-gray-800/60 backdrop-blur-sm shadow-2xl max-w-2xl text-center border border-gray-700 relative z-10"
         >
           <motion.img
+            // Menggunakan jalur gambar lokal Anda
             src="/profile.jpg"
             alt="Foto Joshua Barani"
             className="w-32 h-32 md:w-48 md:h-48 rounded-full shadow-lg mb-6 mx-auto border-4 border-gray-700 object-cover hover:border-blue-400 transition-all duration-300"
@@ -262,14 +294,18 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Hubungi Saya
           </h2>
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">Nama</label>
               <input 
                 type="text" 
                 id="name" 
+                name="nama"
+                value={form.nama}
+                onChange={handleChange}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
                 placeholder="Nama Anda"
+                required
               />
             </div>
             <div>
@@ -277,17 +313,25 @@ export default function Home() {
               <input 
                 type="email" 
                 id="email" 
+                name="email"
+                value={form.email}
+                onChange={handleChange}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
                 placeholder="email@contoh.com"
+                required
               />
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-1">Pesan</label>
               <textarea 
                 id="message" 
+                name="pesan"
+                value={form.pesan}
+                onChange={handleChange}
                 rows={5}
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
                 placeholder="Pesan Anda..."
+                required
               ></textarea>
             </div>
             <motion.button
@@ -298,6 +342,7 @@ export default function Home() {
             >
               Kirim Pesan
             </motion.button>
+            {status && <p className="text-sm mt-2 text-center">{status}</p>}
           </form>
           <div className="mt-8 pt-8 border-t border-gray-700">
             <h3 className="text-lg font-medium text-gray-300 mb-4">Atau hubungi saya melalui:</h3>
@@ -333,6 +378,7 @@ export default function Home() {
               >
                 <span className="sr-only">{social}</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  {/* Ini adalah SVG path untuk GitHub, sesuai yang ada di kode awal Anda */}
                   <path fillRule="evenodd" d={`M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z`} clipRule="evenodd" />
                 </svg>
               </a>
@@ -344,5 +390,5 @@ export default function Home() {
         </div>
       </footer>
     </>
-  )
+  );
 }
