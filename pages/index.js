@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Head from 'next/head'; // Tetap menggunakan Head karena Anda menyebutkan direktori (mengindikasikan Next.js)
-import { createClient } from '@supabase/supabase-js'; // Tetap menggunakan Supabase jika Anda menggunakannya di Next.js
+import { supabase } from '../lib/supabaseClient'
 
-// Konfigurasi Supabase - PASTIKAN .env.local Anda terisi dengan benar di proyek Next.js
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+
+
 
 export default function Home() {
   // State untuk form kontak
